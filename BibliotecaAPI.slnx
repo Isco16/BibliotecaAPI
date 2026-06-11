@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BibliotecaAPI/BibliotecaAPI.csproj" />
+  <Project Path="BibliotecaAPITests/BibliotecaAPITests.csproj" Id="85a69202-6d63-40f4-84d3-468289aa064c" />
+</Solution>

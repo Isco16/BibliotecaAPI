@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prueba</title>
+</head>
+<body>
+    <h1>Bienvenido a la Biblioteca API</h1>
+    <script>
+        var headers = new Headers(
+            {
+                "X-Api-Key": "083b524a4d6a49a4bff2fb0f93efc1b1"
+            }
+        );
+
+        fetch('https://localhost:7154/api/v1/autores', {
+            headers: headers
+        })
+        .then(response => response.text())
+        .then(data => {console.log(data);})
+    </script>
+</body>
+</html>
