@@ -11,7 +11,7 @@ on: # condiciones de ejecucion
       - '.github/workflows/compilar-y-desplegar.yml'
 
 env: # variable de entorno a nivel global del archivo
-  VERSION_DOTNET: '10.0.8'
+  VERSION_DOTNET: '10.0'
 
 jobs: # 1 job = conjunto de tareas
   build: # nombre de la tarea
