@@ -1,0 +1,29 @@
+name: Hola mundo
+
+on: # bajo que condiciones se ejecuta el archivo
+  workflow_dispatch: # ejecucion manual
+  push: # comandos push
+    branches: # ramas
+      - main
+    paths: # directorios
+      - 'BibliotecaAPI/**'
+      - 'BibliotecaAPITests/**'
+      - '.github/workflows/hola-mundo.yml'
+  pull_request: # pull request a alguna rama
+    branches:
+      - main
+
+jobs: # Conjunto de tareas a ejecutar
+  saludar: # Nombre de la tarea
+    runs-on: ubuntu-latest # en que sistema operativo se ejecutan las tareas
+    steps: # pasos de la tarea
+      - name: Muestra mensaje hola mundo
+        run: echo "hola mundo" # comando de escribir mensaje
+      - name: Checkout # tarea predefinida que descarga el repo para poder utilizarlo
+        uses: actions/checkout@v6.0.3 # se indica cual tarea predefinida (hecha pro terceros) se usa
+      - name: Listar los archivos del repositorio.
+        run: 
+          echo "El repositorio ${{ github.repository }} contiene los siguientes archivos:"
+          tree # comando que muestra todas las carpetas del directorio actual
+
+      
