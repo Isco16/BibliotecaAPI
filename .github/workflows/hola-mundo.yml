@@ -23,6 +23,5 @@ jobs: # Conjunto de tareas a ejecutar
         uses: actions/checkout@v6.0.3 # se indica cual tarea predefinida (hecha pro terceros) se usa
       - name: Listar los archivos del repositorio.
         run: 
-          echo "El repositorio ${{ github.repository }} contiene los siguientes archivos:"
           tree
       
