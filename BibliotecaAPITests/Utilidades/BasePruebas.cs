@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using BibliotecaAPI.Datos;
 using BibliotecaAPI.DTOs;
+using BibliotecaAPI.Entidades;
+using BibliotecaAPI.Jobs;
+using BibliotecaAPI.Servicios;
 using BibliotecaAPI.Utilidades;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,9 +11,12 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.RateLimiting;
 
 namespace BibliotecaAPITests.Utilidades
 {
@@ -55,6 +61,30 @@ namespace BibliotecaAPITests.Utilidades
                     if (descriptorDBContext is not null)
                     {
                         services.Remove(descriptorDBContext);
+                    }
+
+                    // Remove RateLimiter service
+                    var descriptorRateLimiter = services.SingleOrDefault(d => d.ServiceType == typeof(RateLimiter));
+                    if (descriptorRateLimiter is not null)
+                    {
+                        services.Remove(descriptorRateLimiter);
+                    }
+
+                    foreach (var service in services)
+                    {
+                        // Elimina el servicio de Facturas en segundo plano: FacturasBackgroundService
+                        var descriptorFacturasBackground = service;
+                        if (descriptorFacturasBackground.ImplementationType == typeof(FacturasBackgroundService))
+                        {
+                            services.Remove(descriptorFacturasBackground);
+                            break;
+                        }
+
+                        if (service.ImplementationType == typeof(LimitarPeticionesMiddleware))
+                        {
+                            services.Remove(service);
+                            break;
+                        }
                     }
 
                     services.AddDbContext<ApplicationDbContext>(opciones => opciones.UseInMemoryDatabase(nombreBD));
@@ -127,6 +157,20 @@ namespace BibliotecaAPITests.Utilidades
 
             Assert.IsNotNull(respuestaAutenticacion.Token);
             return respuestaAutenticacion.Token;
+        }
+
+        protected async Task<string> ObtenerAPIKey(string nombreBD, WebApplicationFactory<Program> factory, string email, TipoLLave tipoLlave)
+        {
+            var context = ConstruirContext(nombreBD);
+            var userDB = await context.Users.FirstOrDefaultAsync(x => x.Email == email);
+
+            var llaveDB = await context.LlavesAPI
+                //.Include(x => x.RestriccionesDominio)
+                //.Include(x => x.RestriccionesIP)
+                //.Include(x => x.Usuario)
+                .FirstOrDefaultAsync(x => x.UsuarioId == userDB!.Id);
+
+            return llaveDB!.Llave;
         }
     }
 }

@@ -323,8 +323,8 @@ app.UseRateLimiter(); // Se coloca despues de la carga de archivos estaticos por
 // Habilita el middleware de CORS para permitir solicitudes desde cualquier origen, método y encabezado, lo que es útil para permitir la comunicación entre el frontend y el backend de la aplicación, especialmente cuando están alojados en dominios diferentes.
 app.UseCors();
 
-// Se debe usar a este nivel, despues de app.UseStaticFiles() y app.UseCors() para evitar problemas en los errores que puedan ocurrir el cual puedan interferir en el correcto funcionamiento
-//app.UseLimitarPeticiones();
+//// Se debe usar a este nivel, despues de app.UseStaticFiles() y app.UseCors() para evitar problemas en los errores que puedan ocurrir el cual puedan interferir en el correcto funcionamiento
+app.UseLimitarPeticiones();
 
 app.UseOutputCache(); // Habilita el middleware de caché de salida, lo que permite almacenar en caché las respuestas de las solicitudes para mejorar el rendimiento de la aplicación al reducir la carga en el servidor y acelerar la entrega de contenido a los clientes.
 //app.MapGet("/", () => "Hello World!");

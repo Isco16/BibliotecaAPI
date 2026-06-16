@@ -1,6 +1,7 @@
 ﻿using BibliotecaAPI.DTOs;
 using BibliotecaAPI.Entidades;
 using BibliotecaAPITests.Utilidades;
+using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
@@ -14,12 +15,24 @@ namespace BibliotecaAPITests.PruebasDeIntegracion.Controllers.V1
         public static readonly string url = "/api/v1/autores";
         private string nombreBD = Guid.NewGuid().ToString();
 
+
         [TestMethod]
         public async Task Get_Devuelve404_CuandoAutorNoExiste()
         {
             // Preparacion
             var factory = ConstruirWebApplicationFactory(nombreBD);
+
+
+            var claims = new List<Claim> { adminClaim };
+
+            string email = "ejemplo@hotmail.com";
+
+            // Ahora se le envia la lista de claims
+            var token = await CrearUsuario(nombreBD, factory, claims, email);
+
+            string llaveAPI = await ObtenerAPIKey(nombreBD, factory, email, TipoLLave.Profesional); // Se obtiene la llave API
             var cliente = factory.CreateClient(); // Se crea el cliente HTTP para realiazr peticiones
+            cliente.DefaultRequestHeaders.Add("X-Api-Key", llaveAPI); // Se agrega la llave API en el header de la peticion HTTP
 
             // Prueba
             var respuesta = await cliente.GetAsync($"{url}/1");
@@ -39,7 +52,17 @@ namespace BibliotecaAPITests.PruebasDeIntegracion.Controllers.V1
             await context.SaveChangesAsync();
 
             var factory = ConstruirWebApplicationFactory(nombreBD);
+
+            var claims = new List<Claim> { adminClaim };
+
+            string email = "ejemplo@hotmail.com";
+
+            // Ahora se le envia la lista de claims
+            var token = await CrearUsuario(nombreBD, factory, claims, email);
+
+            string llaveAPI = await ObtenerAPIKey(nombreBD, factory, email, TipoLLave.Profesional); // Se obtiene la llave API
             var cliente = factory.CreateClient(); // Se crea el cliente HTTP para realiazr peticiones
+            cliente.DefaultRequestHeaders.Add("X-Api-Key", llaveAPI); // Se agrega la llave API en el header de la peticion HTTP
 
             // Prueba
             var respuesta = await cliente.GetAsync($"{url}/1");
@@ -106,13 +129,18 @@ namespace BibliotecaAPITests.PruebasDeIntegracion.Controllers.V1
             var factory = ConstruirWebApplicationFactory(nombreBD, ignorarSeguridad: false); // No se quiere ignorar las reglas de seguridad
 
             var claims = new List<Claim> { adminClaim };
-            
-            // Ahora se le envia la lista de claims
-            var token = await CrearUsuario(nombreBD, factory, claims);
 
+            string email = "ejemplo@hotmail.com";
+
+            // Ahora se le envia la lista de claims
+            var token = await CrearUsuario(nombreBD, factory, claims, email);
+
+            string llaveAPI = await ObtenerAPIKey(nombreBD, factory, email, TipoLLave.Profesional); // Se obtiene la llave API
             var cliente = factory.CreateClient(); // Se crea el cliente HTTP para realiazr peticiones
+            cliente.DefaultRequestHeaders.Add("X-Api-Key", llaveAPI); // Se agrega la llave API en el header de la peticion HTTP
 
             cliente.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
 
             var autorCreacionDTO = new AutorCreacionDTO
             {

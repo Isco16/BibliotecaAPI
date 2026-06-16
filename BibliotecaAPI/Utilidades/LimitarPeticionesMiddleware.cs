@@ -1,6 +1,7 @@
 ﻿using BibliotecaAPI.Datos;
 using BibliotecaAPI.DTOs;
 using BibliotecaAPI.Entidades;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -15,7 +16,7 @@ namespace BibliotecaAPI.Utilidades
         }
     }
 
-    public class LimitarPeticionesMiddleware
+    public class LimitarPeticionesMiddleware//: IMiddleware
     {
         private readonly RequestDelegate next;
         // El middleware es basicamente como un Singleton
@@ -133,6 +134,11 @@ namespace BibliotecaAPI.Utilidades
 
             await next(httpContext);
         }
+
+        //public Task InvokeAsync(HttpContext context, RequestDelegate next)
+        //{
+        //    return next(context);
+        //}
 
         private bool PeticionSuperaAlgunaDeLasRestricciones(LlaveAPI llaveAPI, HttpContext httpContext)
         {

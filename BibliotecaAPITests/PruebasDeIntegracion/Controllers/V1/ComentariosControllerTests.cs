@@ -3,6 +3,7 @@ using BibliotecaAPITests.Utilidades;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 
 namespace BibliotecaAPITests.PruebasDeIntegracion.Controllers.V1
 {
@@ -32,8 +33,15 @@ namespace BibliotecaAPITests.PruebasDeIntegracion.Controllers.V1
             await CrearDataDePrueba();
             var factory = ConstruirWebApplicationFactory(nombreBD, ignorarSeguridad: false);
 
-            var token = await CrearUsuario(nombreBD, factory);
 
+            var claims = new List<Claim> { adminClaim };
+
+            string email = "ejemplo@hotmail.com";
+
+            var token = await CrearUsuario(nombreBD, factory, claims, email);
+            string llaveAPI = await ObtenerAPIKey(nombreBD, factory, email, TipoLLave.Profesional); // Se obtiene la llave API
+
+            // Ahora se le envia la lista de claims
             var context = ConstruirContext(nombreBD);
             var usuario = await context.Users.FirstAsync();// el unico usuario que debe existir
 
@@ -50,6 +58,7 @@ namespace BibliotecaAPITests.PruebasDeIntegracion.Controllers.V1
 
             var cliente = factory.CreateClient();
             cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            cliente.DefaultRequestHeaders.Add("X-Api-Key", llaveAPI); // Se agrega la llave API en el header de la peticion HTTP
 
             // Prueba
             var respuesta = await cliente.DeleteAsync($"{url}/{comentario.Id}");
@@ -67,6 +76,7 @@ namespace BibliotecaAPITests.PruebasDeIntegracion.Controllers.V1
 
             var emailCreadorComentario = "creado-comentario@hotmail.com";
             await CrearUsuario(nombreBD, factory, [], emailCreadorComentario);
+            string llaveAPI = await ObtenerAPIKey(nombreBD, factory, emailCreadorComentario, TipoLLave.Profesional); // Se obtiene la llave API
 
             var context = ConstruirContext(nombreBD);
             var usuarioCreadorComentario = await context.Users.FirstAsync();// el unico usuario que debe existir
@@ -85,6 +95,7 @@ namespace BibliotecaAPITests.PruebasDeIntegracion.Controllers.V1
 
             var cliente = factory.CreateClient();
             cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenUsuarioDistinto); // Se asigna el token de otro usuario distinto
+            cliente.DefaultRequestHeaders.Add("X-Api-Key", llaveAPI); // Se agrega la llave API en el header de la peticion HTTP
 
             // Prueba
             var respuesta = await cliente.DeleteAsync($"{url}/{comentario.Id}");// peticion con credenciales invalidas para borrar un comentario
